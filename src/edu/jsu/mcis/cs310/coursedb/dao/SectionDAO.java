@@ -4,10 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import com.github.cliftonlabs.json_simple.*;
 
 public class SectionDAO {
-    
-    // INSERT YOUR CODE HERE
     
     private final DAOFactory daoFactory;
     
@@ -17,22 +16,45 @@ public class SectionDAO {
     
     public String find(int termid, String subjectid, String num) {
         
-        String result = null;
+        JsonArray result = new JsonArray();
         
         PreparedStatement ps = null;
         ResultSet rs = null;
         ResultSetMetaData rsmd = null;
+        
         
         try {
             
             Connection conn = daoFactory.getConnection();
             
             if (conn.isValid(0)) {
+
+                String query = "SELECT * FROM section WHERE termid = ? AND subjectid = ? AND num = ? ORDER BY crn";
+                ps = conn.prepareStatement(query);
+                ps.setString(1, String.valueOf(termid));
+                ps.setString(2, subjectid);
+                ps.setString(3, num);
                 
-                // INSERT YOUR CODE HERE
+                boolean hasresults = ps.execute();
                 
+                if (hasresults) {
+                    rs = ps.getResultSet();
+
+                    while(rs.next()) {
+                        JsonObject jsonObject = new JsonObject();
+                        rsmd = rs.getMetaData();
+                        
+                        for ( int i = 1; i < rsmd.getColumnCount()+1; i++) {
+                            String colLabel = rsmd.getColumnLabel(i);
+                            String colValue = rs.getString(colLabel);
+                            
+                            jsonObject.put(colLabel, colValue);
+                        }
+                        
+                        result.add(jsonObject);
+                    }
+                }
             }
-            
         }
         
         catch (Exception e) { e.printStackTrace(); }
@@ -44,7 +66,7 @@ public class SectionDAO {
             
         }
         
-        return result;
+        return Jsoner.serialize(result);
         
     }
     
