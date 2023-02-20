@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import com.github.cliftonlabs.json_simple.*;
+import static edu.jsu.mcis.cs310.coursedb.dao.DAOUtility.getResultSetAsJson;
 
 public class SectionDAO {
     
@@ -16,7 +17,7 @@ public class SectionDAO {
     
     public String find(int termid, String subjectid, String num) {
         
-        JsonArray result = new JsonArray();
+        String result = "";
         
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -40,19 +41,7 @@ public class SectionDAO {
                 if (hasresults) {
                     rs = ps.getResultSet();
 
-                    while(rs.next()) {
-                        JsonObject jsonObject = new JsonObject();
-                        rsmd = rs.getMetaData();
-                        
-                        for ( int i = 1; i < rsmd.getColumnCount()+1; i++) {
-                            String colLabel = rsmd.getColumnLabel(i);
-                            String colValue = rs.getString(colLabel);
-                            
-                            jsonObject.put(colLabel, colValue);
-                        }
-                        
-                        result.add(jsonObject);
-                    }
+                    result = getResultSetAsJson(rs);
                 }
             }
         }
@@ -66,7 +55,7 @@ public class SectionDAO {
             
         }
         
-        return Jsoner.serialize(result);
+        return result;
         
     }
     
