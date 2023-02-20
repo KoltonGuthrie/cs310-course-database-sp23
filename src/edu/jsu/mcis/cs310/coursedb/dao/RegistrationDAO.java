@@ -1,6 +1,7 @@
 package edu.jsu.mcis.cs310.coursedb.dao;
 
 import com.github.cliftonlabs.json_simple.*;
+import static edu.jsu.mcis.cs310.coursedb.dao.DAOUtility.getResultSetAsJson;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -140,7 +141,7 @@ public class RegistrationDAO {
 
     public String list(int studentid, int termid) {
         
-        JsonArray result = new JsonArray();
+        String result = null;
         
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -163,19 +164,7 @@ public class RegistrationDAO {
 
                     rs = ps.getResultSet();
 
-                    while(rs.next()) {
-                        JsonObject jsonObject = new JsonObject();
-                        rsmd = rs.getMetaData();
-                        
-                        for ( int i = 1; i < rsmd.getColumnCount()+1; i++) {
-                            String colLabel = rsmd.getColumnLabel(i);
-                            String colValue = rs.getString(colLabel);
-                            
-                            jsonObject.put(colLabel, colValue);
-                        }
-                        
-                        result.add(jsonObject);
-                    }
+                    result = getResultSetAsJson(rs);
                 }
             }
             
@@ -190,7 +179,7 @@ public class RegistrationDAO {
             
         }
         
-        return Jsoner.serialize(result);
+        return result;
         
     }
     
